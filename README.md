@@ -35,5 +35,5 @@ The implementation includes a testFile that tests the Quark hash functions with 
 
 
 #### Sources 
-QUARK: A Lightweight Hash, Jean-Philippe Aumasson, NAGRA, route de Genève 22, 1033 Cheseaux, Switzerland
-> https://131002.net/quark/quark_full.pdf
+[QUARK: A Lightweight Hash, Jean-Philippe Aumasson, NAGRA, route de Genève 22, 1033 Cheseaux, Switzerland](https://131002.net/quark/quark_full.pdf)
+
