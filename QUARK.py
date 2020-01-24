@@ -1,10 +1,10 @@
-# Cette version python du Quark va servir à la validation de l'implémentation en VHDL :
-# En génerant des (message, valeur hashé) et utilisant ces valeurs dans le testbench
-# pour comparer avec l'implémentation VHDL
-
 import numpy as np
 from bitstring import BitArray
 import math
+
+# Cette version python du Quark va servir a la validation de l'implementation en VHDL :
+# En generant des (message, valeur hashe) et utilisant ces valeurs dans le testbench
+# pour comparer avec l'implementation VHDL
 
 class Quark :
     """ Given a message m and a key k(lists of bits),
@@ -43,27 +43,30 @@ class Quark :
         self.m = np.append(self.m,np.array([1]))    # append '1' to the message
         while (len(self.m)%self.r != 0) :           # while message's lenght is not multiple of the rate
             self.m = np.append(self.m,np.array([0]))# append a '0' to the message
-        print("the message after appending : ", self.m)
+        #print("the message after appending : ", self.m)
         self.message_nb = len(self.m)/self.r                # number of message r_bits blocks
-        print("the number of message blocks : ",self.message_nb)
+        #print("the number of message blocks : ",self.message_nb)
         self.m = np.split(self.m,self.message_nb)           # split the message to blocks of 'r' bits each
     def absorb(self) :
+        self.a = False
         for i in range(0,self.message_nb) :
             m_block = self.m[i] # message block of r bits
-            print("the message block : ", m_block)
+            #print("the message block : ", m_block)
             state_block = self.state[self.b-self.r:] # last r bits of the state
             state_block = np.bitwise_xor(m_block,state_block) # state XOR message
             self.state[self.b-self.r:] = state_block # update the internal state
-            print("state after first XOR : ",self.bitsToHex(self.state))
+            #print("state after first XOR : ",self.bitsToHex(self.state))
             self.state = self.permute(self.state) # permute the internal state
-            print("state after absorption : ",self.bitsToHex(self.state))
+            #print("state after absorption iteration: ",self.bitsToHex(self.state))
+        #print("state after absorption : ",self.bitsToHex(self.state))
     def squeeze(self) :
+        self.a = True
         self.output_nb = self.n/self.r  # number of blocks of the output
         result = np.empty((self.output_nb,self.r),np.int8) # create the output arrays
         result[0] = self.state[self.b-self.r:]   # add the last r bits block of the state
         for i in range(1,self.output_nb) :
             self.state = self.permute(self.state)  # permute the internal state
-            print("squeeze step ",i," :",self.bitsToHex(self.state))
+            #print("squeeze step ",i," :",self.bitsToHex(self.state))
             result[i] = self.state[self.b-self.r:]   # add the last r bits block of the state
         result = np.concatenate((result),axis=None)  # concatenate the digest blocks into one array
         return result
@@ -74,13 +77,18 @@ class Quark :
         Xt = state[0:self.b/2] # initialize NFSR of b/2 bits
         Yt = state[self.b/2:] # initialize NFSR of b/2 bits
         Lt = np.ones(int(math.ceil(math.log(4*self.b,2)))).astype(int) # initialize LFSR of [log 4b] bits
-
+        #print(math.ceil(math.log(4*self.b,2)))
+        #print(-1," => X : ", self.bitsToHex(Xt), " Y : ", self.bitsToHex(Yt), " L : ", self.bitsToHex(Lt))
         # update phase
         for i in range(4*self.b) :   # update 4b times
+
             ht = self.h(Xt, Yt, Lt) # calculate ht
+            #print(" le H est :", ht, "le P : ",self.p(Lt),"le G : ",self.g(Yt), "le f :", self.f(Xt))
             Xt = np.append(Xt[1:],np.array([Yt[0] ^ self.f(Xt) ^ ht])) # update Xt
             Yt = np.append(Yt[1:],np.array([self.g(Yt) ^ ht])) # update Yt
             Lt = np.append(Lt[1:],np.array([self.p(Lt)])) # update Lt
+            #if self.a == True :
+            #print(i," => X : ", self.bitsToHex(Xt), " Y : ", self.bitsToHex(Yt), " L : ", Lt)
         new_state = np.append(Xt,Yt) # calculate the output state : (X(4b)......Y(4b))
         return new_state # return the new internal state
 
