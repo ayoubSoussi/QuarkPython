@@ -89,9 +89,6 @@ def test_Quark() :
 
 """_____________ Main Code ____________"""
 
-#test_U_Quark() # test the U-QUARK
+test_U_Quark() # test the U-QUARK
 test_S_Quark() # test the S-QUARK
-#test_D_Quark() # test the D-QUARK
-#object = QUARK.U_Quark()
-#output = object.keyed_hash([0,0,1,1,1,0,0,0],[],output_type="hex")
-#print("U-Quark output (digest) : ",output)
+test_D_Quark() # test the D-QUARK

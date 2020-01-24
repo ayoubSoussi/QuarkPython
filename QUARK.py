@@ -1,6 +1,7 @@
 import numpy as np
 from bitstring import BitArray
 import math
+import sys
 
 # Cette version python du Quark va servir a la validation de l'implementation en VHDL :
 # En generant des (message, valeur hashe) et utilisant ces valeurs dans le testbench
@@ -44,7 +45,7 @@ class Quark :
         while (len(self.m)%self.r != 0) :           # while message's lenght is not multiple of the rate
             self.m = np.append(self.m,np.array([0]))# append a '0' to the message
         #print("the message after appending : ", self.m)
-        self.message_nb = len(self.m)/self.r                # number of message r_bits blocks
+        self.message_nb = len(self.m)//self.r                # number of message r_bits blocks
         #print("the number of message blocks : ",self.message_nb)
         self.m = np.split(self.m,self.message_nb)           # split the message to blocks of 'r' bits each
     def absorb(self) :
@@ -61,7 +62,7 @@ class Quark :
         #print("state after absorption : ",self.bitsToHex(self.state))
     def squeeze(self) :
         self.a = True
-        self.output_nb = self.n/self.r  # number of blocks of the output
+        self.output_nb = self.n//self.r  # number of blocks of the output
         result = np.empty((self.output_nb,self.r),np.int8) # create the output arrays
         result[0] = self.state[self.b-self.r:]   # add the last r bits block of the state
         for i in range(1,self.output_nb) :
@@ -74,8 +75,8 @@ class Quark :
         """Given a state as an array of b bits, the permutation
         function update it and return a new state of b bits too"""
         # initialization phase
-        Xt = state[0:self.b/2] # initialize NFSR of b/2 bits
-        Yt = state[self.b/2:] # initialize NFSR of b/2 bits
+        Xt = state[0:self.b//2] # initialize NFSR of b/2 bits
+        Yt = state[self.b//2:] # initialize NFSR of b/2 bits
         Lt = np.ones(int(math.ceil(math.log(4*self.b,2)))).astype(int) # initialize LFSR of [log 4b] bits
         #print(math.ceil(math.log(4*self.b,2)))
         #print(-1," => X : ", self.bitsToHex(Xt), " Y : ", self.bitsToHex(Yt), " L : ", self.bitsToHex(Lt))
@@ -105,8 +106,16 @@ class Quark :
         """ Convert an array of bits to an hexadecimal
         representation """
         bitsString = np.array2string(bitsArray, max_line_width=len(bitsArray)+2, separator='')[1:-1] # bits representation of the array
-        hex_representation = hex(int(bitsString, 2))[2:-1] #  string hexadecimal representation
-        hex_caracters_nb = len(bitsArray)/4 ; # the lenght of the string needed
+        print(sys.version[0])
+        if (sys.version[0] == '2') :
+            ####### Python2
+            hex_representation = hex(int(bitsString, 2))[2:-1] #  string hexadecimal representation
+        elif (sys.version[0] == '3') :
+            ####### Python3
+            hex_representation = hex(int(bitsString, 2))[2:] #  string hexadecimal representation
+
+
+        hex_caracters_nb = len(bitsArray)//4 ; # the lenght of the string needed
         hex_representation = "0"*(hex_caracters_nb-len(hex_representation)) + hex_representation
         return hex_representation.upper() # return the hex representation in upper case
 
