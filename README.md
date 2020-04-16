@@ -19,7 +19,7 @@ Every instance is a python class that has a method called "keyed_hash()" and it 
 #### Example
 
 In your file, you can import the Quark.py file, create an object of one of the classes and then use the hash function :
-```
+```python
 import QUARK
 # some code...
 object = QUARK.U_Quark()
